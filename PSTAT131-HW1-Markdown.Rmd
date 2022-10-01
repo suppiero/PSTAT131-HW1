@@ -1,0 +1,157 @@
+---
+title: "PSTAT 131 Homework 1"
+author: "Piero Trujillo"
+date: "10/1/2022"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Machine Learning Main Ideas
+
+### Question 1:
+
+Short version:
+
+Supervised learning has a response variable and unsupervised does not have a response variable.
+
+Long version:
+
+In Supervised learning, the data scientist gives the machine observed output and input before allowing the computer to form its own model. However, since this is supervised learning, a data scientist can retrain the model multiple times by correcting the model in order to build the most optimal model.
+
+In unsupervised learning, the machine learns without the help of a data scientist to properly train the model with the “answer key” since we have a lot of data and don’t know which parameters are important. Instead, the machine figures out what parameters are important and correlated.
+
+### Question 2:
+
+A regression model is used when your outcome consists of continuous numerical data and can compute the probabilistic relationship between our variables. 
+
+A classification model is used when your outcome is categorical data. Likewise, it is also used when you can predict the category / label of our variables.
+
+
+### Question 3: 
+
+Two commonly used metrics for regression ML problems are rmse, and mean absolute error (MAE).
+
+Two commonly used metrics for classification ML problems are accuracy rate, and f1 score.
+
+### Question 4:
+
+Descriptive models allow you to best describe what our data is or what our data shows. Therefore, it can be defined as choosing a model to best visually emphasize a trend. An example would be adding a line to a scatterplot. They try to Illustrate a trend.
+
+Inferential models aim to test theories and find out what features are significant. They sometimes find casual claims. Also state the relationship between the outcome and the predictors.
+
+Predictive models aim to predict the correct future outcomes with minimum reducible error by analyzing the data you give to them. They are not focused on hypothesis tests. They try to find the best combination of features to predict accurate results. Predictive models is how well can you predict y with a combination of x.
+
+Citation: (pg. 7 of lecture slides).
+
+
+### Question 5:
+
+
+A Mechanistic model describes a model in which all its information is represented within its parameters. An Empirically-driven model has information where its output is determined by a small number of parameters.
+
+Mechanistic models are those that require the specification of some parameters before they can be used to make predictions, while Empirically-driven models do not rely on any specific parameter settings and therefore often produce more accurate results. (Citation: Vitalflux.com). They are both similar because they have the same downside because both cases are subject to overfitting. 
+
+A mechanistic model uses a theory to predict what will happen in the real world. An empirically-driven model uses historical data from the real-world to develop a theory. (Citation: Chron.com)
+
+In general, mechanistic models are easier to understand but are less flexible. Meanwhile, empirically-driven models fit the data a lot better since there is one model that can be used by a lot of datasets but have higher variance. For example, I believe a mechanistic model is easier to understand because the results of this model reflects the dataset you gave to your model which I think is easier to understand because all of the evidence is right there. Likewise, with an empirically-driven model, you would have to understand a whole new theory just to understand why you got the results you did.
+
+The bias variance tradeoff is related to mechanistic or empirically-driven models because both topics have inversely related properties that affect the model. For example, using an empirically driven model would be like increasing your variance and decreasing your bias because we are basing our outcome from a small set of parameters. Likewise, using a mechanistic model would be like increasing your bias and decreasing your variance because we know our outcomes are reflected in all the parameters of the dataset we gave the model so our outcomes will have less variability.
+
+
+### Question 6:
+
+
+#### Given a voter’s profile/data, how likely is it that they will vote in favor of the candidate?
+ 
+ 
+Predictive means we are given test data which we do not know its likelihood and would like to predict it. Therefore, since we are given a voter’s profile, in this case the test data, and we are trying to predict the likelihood of voting in the candidates favor, we can confirm this is predictive.
+ 
+ 
+#### How would a voter’s likelihood of support for the candidate change if they had personal contact with the candidate?
+
+
+Inferential means that we are given a certain feature and we want to see if it has a positive or negative impact. Therefore, this is an inferential question because the new feature is personal contact with the candidate and we are measuring its impact on how a voter will vote for this candidate.
+
+## Exploratory Data Analysis
+
+```{r}
+library(tidyverse)
+library(reshape2)
+library(ggplot2)
+library(corrplot)
+```
+
+
+### Exercise 1
+
+```{r}
+#hist(mpg$hwy)
+
+ggplot(mpg, aes(x=hwy)) + geom_histogram(color="black", fill="white")
+```
+
+Most cars have a highway mpg of 25-30 miles. There is also a high amount of cars that have a highway mpg of 15-20 miles. There aren't very many cars on the road that have less than 15 mpg and over 35 mpg. The graph is bimodal.
+
+### Exercise 2
+
+```{r}
+#plot(mpg$hwy, mpg$cty)
+
+ggplot(mpg, aes(x=hwy, y=cty)) + geom_point(color='orange') + labs(x="Highway MPG", y="City MPG", title="HWY vs CTY MPG")
+```
+
+There is a high positive correlation between mpg and city. This means that as as the amount of highway miles increase so does the amount of city miles. We can also accurately predict the highway mpg of a car from its city mpg and vice versa. We can also predict the overall fuel efficiency of a car from the highway / city mpg.
+
+
+### Exercise 3
+
+```{r}
+# setting levels in increasing order
+mpgnew <- within(mpg, 
+                 mpg$manufacturer <- factor(mpg$manufacturer, 
+                                      levels=names(sort(table(mpg$manufacturer), 
+                                                        decreasing=TRUE))))
+# plot
+ggplot(mpgnew,aes(y=mpg$manufacturer))+geom_bar(binwidth=1)
+```
+
+Lincoln made the least amount of cars and Dodge made the most amount of cars.
+
+
+### Exercise 4
+
+```{r}
+# grouped boxplot
+
+plot <- ggplot(mpg, aes(x=factor(cyl), y=hwy, color = cyl, fill ="cyl"))+
+  geom_boxplot()+
+  theme(legend.position = "none" )
+
+# print boxplot
+plot
+```
+
+I noticed that mpg goes down as the amount of cylinders in your car goes up. So the cars with the least amount of cylinders have the best mpg. Also only the highest and lowest cylinders have outliers.
+
+
+### Exercise 5
+
+```{r}
+# drop non numeric
+mpg.numeric <- mpg[,sapply(mpg, is.numeric)]
+
+head(mpg.numeric) 
+
+trianglelow <-cor(mpg.numeric)
+
+# so i can tell what my numbers mean
+head(round(trianglelow,2)) 
+
+corrplot(trianglelow, type="lower")
+```
+
+
+Surprisingly, engine displacement (displ) is perfectly positively correlated with every other attribute. I'm not sure why that is the case since im pretty sure engine displacement measures engine power. City and Highway mpg are also negatively correlated with the number of cylinders in a car which makes sense since the highest cylinder cars have the lowest mpg and vice versa. Likewise, city and highway mpg are highly positively correlated with each other. This makes sense because we graphed them against each other and saw that they had a strong positive linear relationship with each other.
